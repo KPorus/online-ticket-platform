@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="../assets/jatri-logo.svg" alt="Jatri" width="280" />
+  <img src="../jatri-logo.svg" alt="Jatri" width="280" />
   <h1>Jatri — System Architecture & Engineering Notes</h1>
   <p><em>Real-time, multi-modal travel ticketing for Bangladesh.</em></p>
 </div>
