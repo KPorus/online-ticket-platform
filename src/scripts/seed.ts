@@ -73,7 +73,7 @@ async function run(): Promise<void> {
   const vendorHash = await bcrypt.hash('Vendor@1234', 10);
   const vendor = await User.create({
     name: 'GreenLine Travels',
-    email: 'vendor@ticketcutter.com',
+    email: 'vendor@jatri.com',
     passwordHash: vendorHash,
     role: 'vendor',
     provider: 'local',
@@ -83,7 +83,7 @@ async function run(): Promise<void> {
   const userHash = await bcrypt.hash('User@1234', 10);
   await User.create({
     name: 'Demo User',
-    email: 'user@ticketcutter.com',
+    email: 'user@jatri.com',
     passwordHash: userHash,
     role: 'user',
     provider: 'local',
@@ -144,8 +144,8 @@ async function run(): Promise<void> {
   console.log('[seed] done.');
   console.log('--------------------------------------------------');
   console.log(`Admin:  ${env.seedAdminEmail} / ${env.seedAdminPassword}`);
-  console.log('Vendor: vendor@ticketcutter.com / Vendor@1234');
-  console.log('User:   user@ticketcutter.com / User@1234');
+  console.log('Vendor: vendor@jatri.com / Vendor@1234');
+  console.log('User:   user@jatri.com / User@1234');
   console.log(`Cities seeded: ${BD_CITIES.length}, Routes: ${ROUTES.length}, Vehicles: ${vehicles.length}`);
   console.log('--------------------------------------------------');
 

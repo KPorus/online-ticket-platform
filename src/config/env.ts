@@ -20,7 +20,7 @@ export const env = {
   stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
   imgbbKey: process.env.IMGBB_KEY || '',
-  seedAdminEmail: process.env.SEED_ADMIN_EMAIL || 'admin@ticketcutter.com',
+  seedAdminEmail: process.env.SEED_ADMIN_EMAIL || 'admin@jatri.com',
   seedAdminPassword: process.env.SEED_ADMIN_PASSWORD || 'Admin@1234',
   holdMinutes: 5,
 };
