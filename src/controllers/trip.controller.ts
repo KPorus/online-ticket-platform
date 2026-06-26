@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { Types } from 'mongoose';
 import { Trip } from '../models/Trip';
 import { Vehicle } from '../models/Vehicle';
-import { Seat } from '../models/Seat';
+import { Seat, ISeat } from '../models/Seat';
 import { Booking } from '../models/Booking';
 import { User } from '../models/User';
 import { ApiError } from '../utils/ApiError';
@@ -114,19 +114,44 @@ export const advertisedTrips = asyncHandler(async (_req: Request, res: Response)
   res.json({ success: true, trips });
 });
 
+/**
+ * Returns a client-safe seat shape. Crucially it exposes a `mine` flag (held by the current
+ * viewer - matched by the browser guestId and/or the authenticated user) WITHOUT ever leaking
+ * other holders' ids, so a returning user can re-claim and pay for the seats they already hold.
+ */
+function mapSeatsForViewer(seats: ISeat[], req: Request) {
+  const now = Date.now();
+  const guestId = typeof req.query.holderId === 'string' ? req.query.holderId.slice(0, 64) : '';
+  const userId = req.user?.id;
+  return seats.map((s) => {
+    const active = s.status === 'held' && !!s.holdExpiresAt && s.holdExpiresAt.getTime() > now;
+    const mine =
+      active &&
+      ((!!guestId && s.holderId === guestId) ||
+        (!!userId && (s.holderId === userId || String(s.holderUser) === userId)));
+    return {
+      _id: s._id,
+      seatNumber: s.seatNumber,
+      status: s.status,
+      holdExpiresAt: s.holdExpiresAt,
+      mine,
+    };
+  });
+}
+
 export const getTrip = asyncHandler(async (req: Request, res: Response) => {
   const trip = await Trip.findById(req.params.id)
     .populate('vendor', 'name email')
     .populate('vehicle', 'name type operator seatLayout');
   if (!trip) throw new ApiError(404, 'Trip not found');
 
-  const seats = await Seat.find({ trip: trip._id }).select('seatNumber status holdExpiresAt');
-  res.json({ success: true, trip, seats });
+  const seatsRaw = await Seat.find({ trip: trip._id }).select('seatNumber status holdExpiresAt holderId holderUser');
+  res.json({ success: true, trip, seats: mapSeatsForViewer(seatsRaw, req) });
 });
 
 export const getTripSeats = asyncHandler(async (req: Request, res: Response) => {
-  const seats = await Seat.find({ trip: req.params.id }).select('seatNumber status holdExpiresAt');
-  res.json({ success: true, seats });
+  const seatsRaw = await Seat.find({ trip: req.params.id }).select('seatNumber status holdExpiresAt holderId holderUser');
+  res.json({ success: true, seats: mapSeatsForViewer(seatsRaw, req) });
 });
 
 export const myTrips = asyncHandler(async (req: Request, res: Response) => {

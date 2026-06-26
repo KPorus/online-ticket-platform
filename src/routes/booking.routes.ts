@@ -3,11 +3,12 @@ import { createCheckout, myBookings, myTransactions, cancelBooking } from '../co
 import { confirmSession } from '../controllers/stripe.controller';
 import { requireAuth } from '../middleware/auth';
 import { validate } from '../middleware/validate';
+import { checkoutLimiter } from '../middleware/rateLimit';
 import { checkoutSchema } from '../validators/schemas';
 
 const router = Router();
 
-router.post('/checkout', requireAuth, validate(checkoutSchema), createCheckout);
+router.post('/checkout', requireAuth, checkoutLimiter, validate(checkoutSchema), createCheckout);
 router.post('/confirm', requireAuth, confirmSession);
 router.get('/mine', requireAuth, myBookings);
 router.get('/transactions', requireAuth, myTransactions);

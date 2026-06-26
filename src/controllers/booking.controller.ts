@@ -61,7 +61,7 @@ export const createCheckout = asyncHandler(async (req: Request, res: Response) =
     holdExpiresAt: expiresAt,
   });
 
-  emitToTrip(tripId, 'seat:locked', { seatNumbers, holderId: userId });
+  emitToTrip(tripId, 'seat:locked', { seatNumbers });
 
   const user = await User.findById(userId);
   const session = await createCheckoutSession({

@@ -13,7 +13,7 @@ import {
   toggleAdvertise,
   vendorRevenue,
 } from '../controllers/trip.controller';
-import { requireAuth, requireRole } from '../middleware/auth';
+import { requireAuth, requireRole, optionalAuth } from '../middleware/auth';
 import { validate } from '../middleware/validate';
 import { createTripSchema, updateTripSchema } from '../validators/schemas';
 
@@ -33,9 +33,10 @@ router.post('/', requireAuth, requireRole('vendor'), validate(createTripSchema),
 router.get('/all', requireAuth, requireRole('admin'), listAllTrips);
 router.patch('/:id/advertise', requireAuth, requireRole('admin'), toggleAdvertise);
 
-// Public detail (keep after specific routes to avoid conflicts)
-router.get('/:id', getTrip);
-router.get('/:id/seats', getTripSeats);
+// Public detail (keep after specific routes to avoid conflicts).
+// optionalAuth lets us flag the viewer's own held seats without forcing login.
+router.get('/:id', optionalAuth, getTrip);
+router.get('/:id/seats', optionalAuth, getTripSeats);
 
 router.patch('/:id', requireAuth, requireRole('vendor', 'admin'), validate(updateTripSchema), updateTrip);
 router.delete('/:id', requireAuth, requireRole('vendor', 'admin'), deleteTrip);

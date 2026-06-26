@@ -34,6 +34,22 @@ export function holdExpiry(): Date {
   return new Date(Date.now() + env.holdMinutes * 60 * 1000);
 }
 
+// Identity-based abuse cap: one holder may only actively hold this many seats per trip.
+// Keyed by the browser/user holderId (not IP), so it cannot be bypassed with a VPN.
+export const MAX_HOLDS_PER_TRIP = 6;
+
+/** Count seats currently held by this holder on a trip, excluding one seat (the one being (re)selected). */
+export async function countActiveHolds(tripId: string, holderId: string, excludeSeat?: string): Promise<number> {
+  const filter: Record<string, unknown> = {
+    trip: tripId,
+    status: 'held',
+    holderId,
+    holdExpiresAt: { $gt: new Date() },
+  };
+  if (excludeSeat) filter.seatNumber = { $ne: excludeSeat };
+  return Seat.countDocuments(filter);
+}
+
 /**
  * Attempt to hold a single seat for holderId. Returns the updated seat or null if it could not be held.
  * Uses an atomic conditional update so concurrent requests cannot both win.
